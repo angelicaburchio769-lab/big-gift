@@ -184,8 +184,8 @@ class PixelTool {
     }
 
     displayOriginalImage(img) {
-        const maxWidth = 400;
-        const maxHeight = 400;
+        const maxWidth = 600;
+        const maxHeight = 600;
         
         let width = img.width;
         let height = img.height;
@@ -201,6 +201,8 @@ class PixelTool {
         }
         
         this.originalCanvasManager.setCanvasSize(width, height);
+        const ctx = this.originalCanvasManager.getContext();
+        ctx.imageSmoothingEnabled = false;
         this.originalCanvasManager.drawImage(img, 0, 0, width, height);
     }
 
@@ -303,7 +305,7 @@ class PixelTool {
         
         const link = document.createElement('a');
         link.download = 'pixel-art.png';
-        link.href = canvas.toDataURL('image/png');
+        link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
     }
 
