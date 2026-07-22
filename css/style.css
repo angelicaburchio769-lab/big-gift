@@ -608,7 +608,8 @@ body {
 #editor-main-area {
     display: flex;
     gap: 20px;
-    height: 500px;
+    height: calc(100vh - 280px);
+    min-height: 400px;
 }
 
 .editor-sidebar {
@@ -619,6 +620,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    overflow-y: auto;
+    flex-shrink: 0;
 }
 
 .editor-sidebar h3 {
@@ -824,6 +827,8 @@ body {
         flex-direction: row;
         flex-wrap: wrap;
         gap: 15px;
+        overflow-y: visible;
+        flex-shrink: initial;
     }
 
     .editor-tools,
