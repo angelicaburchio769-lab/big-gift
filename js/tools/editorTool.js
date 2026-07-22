@@ -289,12 +289,13 @@ class EditorTool {
     loadPixels() {
         const imageData = this.ctx.getImageData(0, 0, this.width * this.dpr, this.height * this.dpr);
         const data = imageData.data;
+        const stride = this.width * this.dpr;
         
         this.pixels = [];
         for (let y = 0; y < this.height; y++) {
             this.pixels[y] = [];
             for (let x = 0; x < this.width; x++) {
-                const idx = (y * this.width * this.dpr + x * this.dpr) * 4;
+                const idx = ((y * this.dpr) * stride + (x * this.dpr)) * 4;
                 this.pixels[y][x] = {
                     r: data[idx],
                     g: data[idx + 1],
@@ -727,10 +728,11 @@ class EditorTool {
         const data = imageData.data;
         const outputData = tempCtx.createImageData(this.width, this.height);
         const output = outputData.data;
+        const stride = this.width * this.dpr;
         
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                const idx = (y * this.width * this.dpr + x * this.dpr) * 4;
+                const idx = ((y * this.dpr) * stride + (x * this.dpr)) * 4;
                 const outIdx = (y * this.width + x) * 4;
                 output[outIdx] = data[idx];
                 output[outIdx + 1] = data[idx + 1];
