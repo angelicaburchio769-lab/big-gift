@@ -6,7 +6,6 @@ class CanvasManager {
         this.originalImage = null;
         this.processedImage = null;
         this.processedCanvas = null;
-        this.dpr = window.devicePixelRatio || 1;
         this.initialize();
     }
 
@@ -14,36 +13,23 @@ class CanvasManager {
         this.canvas = document.getElementById(this.canvasId);
         if (this.canvas) {
             this.ctx = this.canvas.getContext('2d');
-            this.ctx.imageSmoothingEnabled = false;
         }
     }
 
-    setCanvasSize(width, height, useDpr = false) {
+    setCanvasSize(width, height) {
         if (!this.canvas) return;
-        
-        if (useDpr) {
-            this.canvas.width = width * this.dpr;
-            this.canvas.height = height * this.dpr;
-            this.canvas.style.width = `${width}px`;
-            this.canvas.style.height = `${height}px`;
-        } else {
-            this.canvas.width = width;
-            this.canvas.height = height;
-            this.canvas.style.width = '';
-            this.canvas.style.height = '';
-        }
+        this.canvas.width = width;
+        this.canvas.height = height;
     }
 
-    drawImage(img, x = 0, y = 0, width = null, height = null, pixelated = true) {
+    drawImage(img, x = 0, y = 0, width = null, height = null) {
         if (!this.ctx || !img) return;
         
         const w = width || img.width;
         const h = height || img.height;
         
-        this.ctx.imageSmoothingEnabled = !pixelated;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.drawImage(img, x, y, w, h);
-        this.ctx.imageSmoothingEnabled = false;
     }
 
     getImageData() {
@@ -61,32 +47,35 @@ class CanvasManager {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    saveImage(filename = 'image.png', quality = 1.0) {
+    saveImage(filename = 'image.png') {
         if (!this.canvas) return;
         
         const link = document.createElement('a');
         link.download = filename;
-        link.href = this.canvas.toDataURL('image/png', quality);
+        link.href = this.canvas.toDataURL('image/png');
         link.click();
     }
 
-    resizeCanvasToImage(img, maxWidth = null, maxHeight = null, useDpr = false) {
+    resizeCanvasToImage(img) {
         if (!this.canvas || !img) return;
+        
+        const maxWidth = 800;
+        const maxHeight = 600;
         
         let width = img.width;
         let height = img.height;
         
-        if (maxWidth && width > maxWidth) {
+        if (width > maxWidth) {
             height = (height * maxWidth) / width;
             width = maxWidth;
         }
         
-        if (maxHeight && height > maxHeight) {
+        if (height > maxHeight) {
             width = (width * maxHeight) / height;
             height = maxHeight;
         }
         
-        this.setCanvasSize(width, height, useDpr);
+        this.setCanvasSize(width, height);
         this.drawImage(img, 0, 0, width, height);
         
         this.originalImage = img;
@@ -100,10 +89,6 @@ class CanvasManager {
 
     getContext() {
         return this.ctx;
-    }
-
-    getDpr() {
-        return this.dpr;
     }
 }
 
