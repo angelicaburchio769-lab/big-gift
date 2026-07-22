@@ -48,69 +48,67 @@ class OutlineTool {
             }
         }, 100);
 
-        uploadInput && uploadInput.addEventListener('change', (e) => {
+        uploadInput.addEventListener('change', (e) => {
             this.handleFileUpload(e.target.files[0]);
         });
 
-        if (uploadArea) {
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
 
-            uploadArea.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-            });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
 
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    this.handleFileUpload(files[0]);
-                }
-            });
-        }
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.handleFileUpload(files[0]);
+            }
+        });
 
-        enableCheckbox && enableCheckbox.addEventListener('change', (e) => {
+        enableCheckbox.addEventListener('change', (e) => {
             this.settings.enable = e.target.checked;
             this.appState && this.appState.updateToolSettings('outline', { enable: this.settings.enable });
             debouncedProcess();
         });
 
-        colorInput && colorInput.addEventListener('change', (e) => {
+        colorInput.addEventListener('change', (e) => {
             this.settings.color = e.target.value;
             this.appState && this.appState.updateToolSettings('outline', { color: this.settings.color });
             debouncedProcess();
         });
 
-        strengthInput && strengthInput.addEventListener('input', (e) => {
+        strengthInput.addEventListener('input', (e) => {
             this.settings.strength = parseInt(e.target.value);
-            if (strengthValue) strengthValue.textContent = this.settings.strength + '%';
+            strengthValue.textContent = this.settings.strength + '%';
             this.appState && this.appState.updateToolSettings('outline', { strength: this.settings.strength });
             debouncedProcess();
         });
 
-        thresholdInput && thresholdInput.addEventListener('input', (e) => {
+        thresholdInput.addEventListener('input', (e) => {
             this.settings.threshold = parseInt(e.target.value);
-            if (thresholdValue) thresholdValue.textContent = this.settings.threshold;
+            thresholdValue.textContent = this.settings.threshold;
             this.appState && this.appState.updateToolSettings('outline', { threshold: this.settings.threshold });
             debouncedProcess();
         });
 
-        widthInput && widthInput.addEventListener('input', (e) => {
+        widthInput.addEventListener('input', (e) => {
             this.settings.width = parseInt(e.target.value);
-            if (widthValue) widthValue.textContent = this.settings.width;
+            widthValue.textContent = this.settings.width;
             this.appState && this.appState.updateToolSettings('outline', { width: this.settings.width });
             debouncedProcess();
         });
 
-        processBtn && processBtn.addEventListener('click', () => {
+        processBtn.addEventListener('click', () => {
             this.processOutline();
         });
 
-        downloadBtn && downloadBtn.addEventListener('click', () => {
+        downloadBtn.addEventListener('click', () => {
             this.exportOutlineImage();
         });
 
@@ -133,35 +131,26 @@ class OutlineTool {
         
         this.imageLoader.loadFromFile(file, (error, img) => {
             if (error) {
-                this.toast && this.toast.error(error.message || '图片加载失败');
+                this.toast && this.toast.error(error.message);
                 return;
             }
             
-            try {
-                this.currentImage = img;
-                
-                if (this.appState) {
-                    this.appState.setOriginalImage(img.src);
-                    this.appState.addToHistory(img.src, 'upload');
-                }
-                
-                this.prepareProcessCanvas(img);
-                this.displayOriginalImage(img);
-                this.processOutline();
-                
-                const downloadBtn = document.getElementById('outline-download');
-                const continueBtn = document.getElementById('outline-continue');
-                const useCurrentBtn = document.getElementById('outline-use-current');
-                
-                if (downloadBtn) downloadBtn.disabled = false;
-                if (continueBtn) continueBtn.disabled = false;
-                if (useCurrentBtn) useCurrentBtn.style.display = 'none';
-                
-                this.toast && this.toast.success('图片上传成功');
-            } catch (e) {
-                console.error('图片处理失败:', e);
-                this.toast && this.toast.error('图片处理失败，请重试');
+            this.currentImage = img;
+            
+            if (this.appState) {
+                this.appState.setOriginalImage(img.src);
+                this.appState.addToHistory(img.src, 'upload');
             }
+            
+            this.prepareProcessCanvas(img);
+            this.displayOriginalImage(img);
+            this.processOutline();
+            
+            document.getElementById('outline-download').disabled = false;
+            document.getElementById('outline-continue').disabled = false;
+            document.getElementById('outline-use-current').style.display = 'none';
+            
+            this.toast && this.toast.success('图片上传成功');
         });
     }
 
@@ -235,8 +224,8 @@ class OutlineTool {
     }
 
     displayOriginalImage(img) {
-        const maxWidth = 600;
-        const maxHeight = 600;
+        const maxWidth = 400;
+        const maxHeight = 400;
         
         let width = img.width;
         let height = img.height;
@@ -252,8 +241,6 @@ class OutlineTool {
         }
         
         this.originalCanvasManager.setCanvasSize(width, height);
-        const ctx = this.originalCanvasManager.getContext();
-        ctx.imageSmoothingEnabled = false;
         this.originalCanvasManager.drawImage(img, 0, 0, width, height);
     }
 
@@ -421,7 +408,7 @@ class OutlineTool {
         
         const link = document.createElement('a');
         link.download = 'outline-image.png';
-        link.href = canvas.toDataURL('image/png', 1.0);
+        link.href = canvas.toDataURL('image/png');
         link.click();
     }
 
