@@ -745,6 +745,71 @@ body {
     background-color: transparent;
     cursor: crosshair;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    touch-action: none;
+}
+
+.editor-brush-size {
+    padding: 15px;
+    background-color: var(--surface-light);
+    border-radius: 8px;
+}
+
+.editor-brush-size h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.brush-size-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brush-size-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background-color: var(--border-color);
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+}
+
+.brush-size-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(107, 70, 193, 0.4);
+    transition: all 0.2s ease;
+}
+
+.brush-size-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(107, 70, 193, 0.5);
+}
+
+.brush-size-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(107, 70, 193, 0.4);
+}
+
+.brush-size-value {
+    min-width: 40px;
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--primary-color);
 }
 
 @media (max-width: 768px) {
@@ -758,14 +823,60 @@ body {
         width: 100%;
         flex-direction: row;
         flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .editor-tools,
+    .editor-color,
+    .editor-brush-size {
+        flex: 1;
+        min-width: 150px;
     }
 
     .editor-tool-group {
         grid-template-columns: repeat(4, 1fr);
     }
 
+    .editor-tool-btn {
+        min-height: 44px;
+        min-width: 44px;
+        font-size: 0.85rem;
+    }
+
+    .editor-action-btn {
+        min-height: 44px;
+        min-width: 44px;
+        font-size: 0.85rem;
+        padding: 10px 15px;
+    }
+
+    .brush-size-slider {
+        height: 8px;
+    }
+
+    .brush-size-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    .brush-size-slider::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+    }
+
+    .color-picker {
+        width: 50px;
+        height: 50px;
+    }
+
     .editor-canvas-container {
         min-height: 300px;
+        padding: 10px;
+    }
+
+    .editor-canvas {
+        max-width: 100%;
+        max-height: 400px;
     }
 }
 
