@@ -725,6 +725,17 @@ body {
     border-color: #38a169;
 }
 
+.editor-action-btn.delete {
+    background-color: #e53e3e;
+    border-color: #e53e3e;
+    color: white;
+}
+
+.editor-action-btn.delete:hover {
+    background-color: #c53030;
+    border-color: #c53030;
+}
+
 .editor-action-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
