@@ -15,6 +15,7 @@ class EditorTool {
         
         this.currentTool = 'brush';
         this.currentColor = '#000000';
+        this.brushSize = 1;
         this.isDrawing = false;
         this.gridVisible = true;
         
@@ -69,6 +70,7 @@ class EditorTool {
         
         this.setupToolButtons();
         this.setupColorPicker();
+        this.setupBrushSize();
         this.setupActionButtons();
         this.setupCanvasEvents();
     }
@@ -102,6 +104,26 @@ class EditorTool {
         }
     }
 
+    setupBrushSize() {
+        const brushSizeInput = document.getElementById('editor-brush-size');
+        const brushSizeValue = document.getElementById('editor-brush-size-value');
+        
+        if (brushSizeInput) {
+            brushSizeInput.value = this.brushSize;
+            if (brushSizeValue) {
+                brushSizeValue.textContent = `${this.brushSize}px`;
+            }
+            
+            brushSizeInput.addEventListener('input', (e) => {
+                this.brushSize = parseInt(e.target.value);
+                if (brushSizeValue) {
+                    brushSizeValue.textContent = `${this.brushSize}px`;
+                }
+                this.appState && this.appState.updateEditorState({ brushSize: this.brushSize });
+            });
+        }
+    }
+
     setupActionButtons() {
         const buttons = [
             { id: 'editor-undo', action: 'undo' },
@@ -126,6 +148,7 @@ class EditorTool {
         if (!this.canvas) return;
         
         this.ctx = this.canvas.getContext('2d');
+        this.canvas.style.touchAction = 'none';
         
         this.canvas.addEventListener('mousedown', (e) => {
             this.startDrawing(e);
@@ -149,6 +172,28 @@ class EditorTool {
             if (!this.isDrawing) {
                 this.handleCanvasClick(e);
             }
+        });
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            this.startDrawing(touch);
+        });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (this.isDrawing) {
+                const touch = e.touches[0];
+                this.draw(touch);
+            }
+        });
+        
+        this.canvas.addEventListener('touchend', () => {
+            this.stopDrawing();
+        });
+        
+        this.canvas.addEventListener('touchcancel', () => {
+            this.stopDrawing();
         });
     }
 
@@ -305,10 +350,19 @@ class EditorTool {
         
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) return;
         
-        if (this.currentTool === 'brush') {
-            this.setPixel(x, y, this.currentColor);
-        } else if (this.currentTool === 'eraser') {
-            this.setPixel(x, y, 'transparent');
+        const color = this.currentTool === 'eraser' ? 'transparent' : this.currentColor;
+        
+        const size = this.brushSize;
+        const halfSize = Math.floor(size / 2);
+        
+        for (let dy = -halfSize; dy <= halfSize; dy++) {
+            for (let dx = -halfSize; dx <= halfSize; dx++) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
+                    this.setPixel(nx, ny, color);
+                }
+            }
         }
     }
 
@@ -612,6 +666,11 @@ class EditorTool {
         const colorPreview = document.getElementById('editor-color-preview');
         if (colorPicker) colorPicker.value = this.currentColor;
         if (colorPreview) colorPreview.style.backgroundColor = this.currentColor;
+        
+        const brushSizeInput = document.getElementById('editor-brush-size');
+        const brushSizeValue = document.getElementById('editor-brush-size-value');
+        if (brushSizeInput) brushSizeInput.value = this.brushSize;
+        if (brushSizeValue) brushSizeValue.textContent = `${this.brushSize}px`;
         
         document.querySelectorAll('.editor-tool-btn').forEach(btn => {
             btn.classList.remove('active');
