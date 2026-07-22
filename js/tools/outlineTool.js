@@ -1,4 +1,4 @@
-import ImageLoader from '../core/imageLoader.js';
+】import ImageLoader from '../core/imageLoader.js';
 import CanvasManager from '../core/canvasManager.js';
 import Utils from '../core/utils.js';
 
@@ -224,8 +224,8 @@ class OutlineTool {
     }
 
     displayOriginalImage(img) {
-        const maxWidth = 400;
-        const maxHeight = 400;
+        const maxWidth = 600;
+        const maxHeight = 600;
         
         let width = img.width;
         let height = img.height;
@@ -241,6 +241,8 @@ class OutlineTool {
         }
         
         this.originalCanvasManager.setCanvasSize(width, height);
+        const ctx = this.originalCanvasManager.getContext();
+        ctx.imageSmoothingEnabled = false;
         this.originalCanvasManager.drawImage(img, 0, 0, width, height);
     }
 
@@ -408,7 +410,7 @@ class OutlineTool {
         
         const link = document.createElement('a');
         link.download = 'outline-image.png';
-        link.href = canvas.toDataURL('image/png');
+        link.href = canvas.toDataURL('image/png', 1.0);
         link.click();
     }
 
