@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Art Creator</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Pixel Art Creator</h1>
+            <p class="header-subtitle">像素艺术创作工具平台</p>
+        </div>
+    </header>
+
+    <nav class="project-toolbar">
+        <div class="toolbar-container">
+            <div class="project-info">
+                <span class="project-label">项目名称：</span>
+                <span id="project-name" class="project-name">Untitled Project</span>
+            </div>
+            <div class="toolbar-buttons">
+                <button id="new-project" class="toolbar-btn" title="新建项目">
+                    <span class="toolbar-icon">📄</span>
+                    <span>新建项目</span>
+                </button>
+                <button id="open-project" class="toolbar-btn" title="打开项目">
+                    <span class="toolbar-icon">📂</span>
+                    <span>打开项目</span>
+                </button>
+                <button id="save-project" class="toolbar-btn" title="保存项目">
+                    <span class="toolbar-icon">💾</span>
+                    <span>保存项目</span>
+                </button>
+                <span id="save-status" class="save-status save-status-clean">
+                    <span class="status-check">✓</span> 已保存
+                </span>
+            </div>
+            <input type="file" id="project-file-input" accept=".pixelart" style="display: none;">
+        </div>
+    </nav>
+
+    <nav class="tool-navigation">
+        <div class="nav-container">
+            <button class="nav-btn active" data-tool="pixel">图片像素化</button>
+            <button class="nav-btn" data-tool="style">像素风生成</button>
+            <button class="nav-btn" data-tool="outline">自动描边</button>
+            <button class="nav-btn" data-tool="minecraft">Minecraft转换</button>
+            <button class="nav-btn" data-tool="editor">像素编辑器</button>
+        </div>
+    </nav>
+
+    <main class="main-workspace">
+        <div id="pixel-tool" class="tool-panel active">
+            <div class="tool-header">
+                <h2>图片像素化</h2>
+                <p>将图片转换为像素风格</p>
+            </div>
+            <div class="tool-content">
+                <div class="upload-area" id="pixel-upload-area">
+                    <input type="file" id="pixel-upload" accept="image/png,image/jpg,image/jpeg,image/webp" class="file-input">
+                    <label for="pixel-upload" class="upload-label">
+                        <div class="upload-icon">📷</div>
+                        <span>点击或拖拽上传图片</span>
+                    </label>
+                </div>
+                <div class="preview-container">
+                    <div class="preview-column">
+                        <div class="preview-label">原图</div>
+                        <canvas id="pixel-original-canvas" class="preview-canvas"></canvas>
+                    </div>
+                    <div class="preview-column">
+                        <div class="preview-label">像素结果</div>
+                        <canvas id="pixel-result-canvas" class="preview-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Pixel Size:</label>
+                        <input type="range" id="pixel-size" min="2" max="50" value="10">
+                        <span id="pixel-size-value">10</span>
+                    </div>
+                    <div class="button-group">
+                        <button id="pixel-process" class="process-btn">生成像素画</button>
+                        <button id="pixel-download" class="download-btn" disabled>下载 PNG</button>
+                    </div>
+                    <div class="button-group secondary">
+                        <button id="pixel-use-current" class="use-current-btn" style="display: none;">使用当前项目图片</button>
+                        <button id="pixel-continue" class="continue-btn" disabled>继续处理</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="style-tool" class="tool-panel">
+            <div class="tool-header">
+                <h2>像素风生成</h2>
+                <p>将图片转换为复古像素风格</p>
+            </div>
+            <div class="tool-content">
+                <div class="upload-area" id="style-upload-area">
+                    <input type="file" id="style-upload" accept="image/png,image/jpg,image/jpeg,image/webp" class="file-input">
+                    <label for="style-upload" class="upload-label">
+                        <div class="upload-icon">🎨</div>
+                        <span>点击或拖拽上传图片</span>
+                    </label>
+                </div>
+                <div class="preview-container">
+                    <div class="preview-column">
+                        <div class="preview-label">原图</div>
+                        <canvas id="style-original-canvas" class="preview-canvas"></canvas>
+                    </div>
+                    <div class="preview-column">
+                        <div class="preview-label">风格效果</div>
+                        <canvas id="style-result-canvas" class="preview-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="style-selector">
+                        <label>选择风格:</label>
+                        <div class="style-options">
+                            <button class="style-btn active" data-style="eightBit">8-bit复古</button>
+                            <button class="style-btn" data-style="gameBoy">GameBoy</button>
+                            <button class="style-btn" data-style="retro">复古街机</button>
+                            <button class="style-btn" data-style="cartoon">卡通像素</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Color Count:</label>
+                        <input type="range" id="style-color-count" min="4" max="64" value="16">
+                        <span id="style-color-count-value">16</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Style Strength:</label>
+                        <input type="range" id="style-strength" min="0" max="100" value="50">
+                        <span id="style-strength-value">50%</span>
+                    </div>
+                    <div class="button-group">
+                        <button id="style-process" class="process-btn">应用风格</button>
+                        <button id="style-download" class="download-btn" disabled>下载 PNG</button>
+                    </div>
+                    <div class="button-group secondary">
+                        <button id="style-use-current" class="use-current-btn" style="display: none;">使用当前项目图片</button>
+                        <button id="style-continue" class="continue-btn" disabled>继续处理</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="outline-tool" class="tool-panel">
+            <div class="tool-header">
+                <h2>自动描边</h2>
+                <p>为图片添加像素化描边效果</p>
+            </div>
+            <div class="tool-content">
+                <div class="upload-area" id="outline-upload-area">
+                    <input type="file" id="outline-upload" accept="image/png,image/jpg,image/jpeg,image/webp" class="file-input">
+                    <label for="outline-upload" class="upload-label">
+                        <div class="upload-icon">✏️</div>
+                        <span>点击或拖拽上传图片</span>
+                    </label>
+                </div>
+                <div class="preview-container">
+                    <div class="preview-column">
+                        <div class="preview-label">原图</div>
+                        <canvas id="outline-original-canvas" class="preview-canvas"></canvas>
+                    </div>
+                    <div class="preview-column">
+                        <div class="preview-label">描边结果</div>
+                        <canvas id="outline-result-canvas" class="preview-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label>Enable Outline:</label>
+                        <input type="checkbox" id="outline-enable" checked>
+                    </div>
+                    <div class="control-group">
+                        <label>Outline Color:</label>
+                        <input type="color" id="outline-color" value="#000000">
+                    </div>
+                    <div class="control-group">
+                        <label>Outline Strength:</label>
+                        <input type="range" id="outline-strength" min="0" max="100" value="50">
+                        <span id="outline-strength-value">50%</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Threshold:</label>
+                        <input type="range" id="outline-threshold" min="0" max="255" value="30">
+                        <span id="outline-threshold-value">30</span>
+                    </div>
+                    <div class="control-group">
+                        <label>Outline Width:</label>
+                        <input type="range" id="outline-width" min="1" max="5" value="1">
+                        <span id="outline-width-value">1</span>
+                    </div>
+                    <div class="button-group">
+                        <button id="outline-process" class="process-btn">生成描边</button>
+                        <button id="outline-download" class="download-btn" disabled>下载 PNG</button>
+                    </div>
+                    <div class="button-group secondary">
+                        <button id="outline-use-current" class="use-current-btn" style="display: none;">使用当前项目图片</button>
+                        <button id="outline-continue" class="continue-btn" disabled>继续处理</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="minecraft-tool" class="tool-panel">
+            <div class="tool-header">
+                <h2>Minecraft转换</h2>
+                <p>将图片转换为Minecraft方块风格</p>
+            </div>
+            <div class="tool-content">
+                <div class="coming-soon">
+                    <div class="coming-soon-icon">🧊</div>
+                    <h3>Minecraft转换</h3>
+                    <p>功能开发中...</p>
+                    <div class="feature-list">
+                        <p>• 图片像素采样</p>
+                        <p>• 颜色匹配方块</p>
+                        <p>• 材料统计</p>
+                        <p>• 建筑蓝图导出</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="editor-tool" class="tool-panel">
+            <div class="tool-header">
+                <h2>像素编辑器</h2>
+                <p>在线像素画编辑器</p>
+            </div>
+            <div class="tool-content">
+                <div class="upload-area" id="editor-upload-area">
+                    <input type="file" id="editor-upload" accept="image/png,image/jpg,image/jpeg,image/webp" class="file-input">
+                    <label for="editor-upload" class="upload-label">
+                        <div class="upload-icon">🎨</div>
+                        <span>点击或拖拽上传图片</span>
+                    </label>
+                    <button id="editor-use-current" class="use-current-btn" style="display: none;">使用当前项目图片</button>
+                </div>
+                
+                <div id="editor-main-area" style="display: none;">
+                    <div class="editor-sidebar">
+                        <div class="editor-tools">
+                            <h3>工具</h3>
+                            <div class="editor-tool-group">
+                                <button id="editor-tool-brush" class="editor-tool-btn active" title="画笔">
+                                    <span class="tool-icon">✏️</span>
+                                    <span>画笔</span>
+                                </button>
+                                <button id="editor-tool-eraser" class="editor-tool-btn" title="橡皮擦">
+                                    <span class="tool-icon">🧹</span>
+                                    <span>橡皮擦</span>
+                                </button>
+                                <button id="editor-tool-fill" class="editor-tool-btn" title="填充工具">
+                                    <span class="tool-icon">🎨</span>
+                                    <span>填充</span>
+                                </button>
+                                <button id="editor-tool-picker" class="editor-tool-btn" title="吸管工具">
+                                    <span class="tool-icon">🔍</span>
+                                    <span>吸管</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="editor-color">
+                            <h3>颜色</h3>
+                            <div class="color-preview-container">
+                                <div id="editor-color-preview" class="color-preview"></div>
+                                <input type="color" id="editor-color" value="#000000" class="color-picker">
+                            </div>
+                        </div>
+                        
+                        <div class="editor-actions">
+                            <h3>操作</h3>
+                            <div class="editor-action-group">
+                                <button id="editor-undo" class="editor-action-btn" disabled>撤销</button>
+                                <button id="editor-redo" class="editor-action-btn" disabled>重做</button>
+                                <button id="editor-clear" class="editor-action-btn">清空</button>
+                                <button id="editor-reset" class="editor-action-btn">重置</button>
+                                <button id="editor-download" class="editor-action-btn download">下载PNG</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="editor-canvas-container">
+                        <canvas id="editor-canvas" class="editor-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2024 Pixel Art Creator. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
