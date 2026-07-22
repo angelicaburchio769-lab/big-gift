@@ -34,41 +34,43 @@ class PixelTool {
             }
         }, 100);
 
-        uploadInput.addEventListener('change', (e) => {
+        uploadInput && uploadInput.addEventListener('change', (e) => {
             this.handleFileUpload(e.target.files[0]);
         });
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
 
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-        });
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                this.handleFileUpload(files[0]);
-            }
-        });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileUpload(files[0]);
+                }
+            });
+        }
 
-        pixelSizeInput.addEventListener('input', (e) => {
+        pixelSizeInput && pixelSizeInput.addEventListener('input', (e) => {
             this.pixelSize = parseInt(e.target.value);
-            pixelSizeValue.textContent = this.pixelSize;
+            if (pixelSizeValue) pixelSizeValue.textContent = this.pixelSize;
             this.appState && this.appState.updateToolSettings('pixel', { pixelSize: this.pixelSize });
             debouncedProcess();
         });
 
-        processBtn.addEventListener('click', () => {
+        processBtn && processBtn.addEventListener('click', () => {
             this.processImage();
         });
 
-        downloadBtn.addEventListener('click', () => {
+        downloadBtn && downloadBtn.addEventListener('click', () => {
             this.downloadImage();
         });
 
@@ -91,26 +93,35 @@ class PixelTool {
         
         this.imageLoader.loadFromFile(file, (error, img) => {
             if (error) {
-                this.toast && this.toast.error(error.message);
+                this.toast && this.toast.error(error.message || '图片加载失败');
                 return;
             }
             
-            this.currentImage = img;
-            
-            if (this.appState) {
-                this.appState.setOriginalImage(img.src);
-                this.appState.addToHistory(img.src, 'upload');
+            try {
+                this.currentImage = img;
+                
+                if (this.appState) {
+                    this.appState.setOriginalImage(img.src);
+                    this.appState.addToHistory(img.src, 'upload');
+                }
+                
+                this.prepareProcessCanvas(img);
+                this.displayOriginalImage(img);
+                this.processImage();
+                
+                const downloadBtn = document.getElementById('pixel-download');
+                const continueBtn = document.getElementById('pixel-continue');
+                const useCurrentBtn = document.getElementById('pixel-use-current');
+                
+                if (downloadBtn) downloadBtn.disabled = false;
+                if (continueBtn) continueBtn.disabled = false;
+                if (useCurrentBtn) useCurrentBtn.style.display = 'none';
+                
+                this.toast && this.toast.success('图片上传成功');
+            } catch (e) {
+                console.error('图片处理失败:', e);
+                this.toast && this.toast.error('图片处理失败，请重试');
             }
-            
-            this.prepareProcessCanvas(img);
-            this.displayOriginalImage(img);
-            this.processImage();
-            
-            document.getElementById('pixel-download').disabled = false;
-            document.getElementById('pixel-continue').disabled = false;
-            document.getElementById('pixel-use-current').style.display = 'none';
-            
-            this.toast && this.toast.success('图片上传成功');
         });
     }
 
