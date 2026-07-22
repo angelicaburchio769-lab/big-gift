@@ -141,6 +141,13 @@ class EditorTool {
                 });
             }
         });
+        
+        const deleteBtn = document.getElementById('editor-delete');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                this.confirmDeleteImage();
+            });
+        }
     }
 
     setupCanvasEvents() {
@@ -203,16 +210,19 @@ class EditorTool {
             return;
         }
         
-        this.imageLoader.loadFromFile(file).then(img => {
+        this.imageLoader.loadFromFile(file, (error, img) => {
+            if (error) {
+                console.error('图片加载失败:', error);
+                this.toast && this.toast.error('图片加载失败');
+                return;
+            }
+            
             this.loadImage(img);
             if (this.appState) {
                 this.appState.setOriginalImage(img.src);
                 this.appState.addToHistory(img.src, 'upload');
             }
             this.toast && this.toast.success('图片上传成功');
-        }).catch(err => {
-            console.error('图片加载失败:', err);
-            this.toast && this.toast.error('图片加载失败');
         });
     }
 
@@ -638,6 +648,46 @@ class EditorTool {
         if (editorArea) editorArea.style.display = 'none';
         
         this.updateUndoRedoButtons();
+    }
+
+    confirmDeleteImage() {
+        if (!this.canvas || this.canvas.width === 0) {
+            this.toast && this.toast.warning('当前没有可删除的图片');
+            return;
+        }
+        
+        const confirmed = confirm('确定删除当前图片吗？\n删除后无法恢复。');
+        if (confirmed) {
+            this.deleteImage();
+        }
+    }
+
+    deleteImage() {
+        this.pixels = [];
+        this.width = 0;
+        this.height = 0;
+        this.historyManager.clear();
+        
+        this.canvas.width = 0;
+        this.canvas.height = 0;
+        
+        const uploadArea = document.getElementById('editor-upload-area');
+        const editorArea = document.getElementById('editor-main-area');
+        
+        if (uploadArea) uploadArea.style.display = 'block';
+        if (editorArea) editorArea.style.display = 'none';
+        
+        this.updateUndoRedoButtons();
+        
+        if (this.appState) {
+            this.appState.updateEditorState({
+                pixels: [],
+                width: 0,
+                height: 0
+            });
+        }
+        
+        this.toast && this.toast.success('图片已删除');
     }
 
     download() {
