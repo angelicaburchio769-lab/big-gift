@@ -34,43 +34,41 @@ class PixelTool {
             }
         }, 100);
 
-        uploadInput && uploadInput.addEventListener('change', (e) => {
+        uploadInput.addEventListener('change', (e) => {
             this.handleFileUpload(e.target.files[0]);
         });
 
-        if (uploadArea) {
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
 
-            uploadArea.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-            });
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
 
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    this.handleFileUpload(files[0]);
-                }
-            });
-        }
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.handleFileUpload(files[0]);
+            }
+        });
 
-        pixelSizeInput && pixelSizeInput.addEventListener('input', (e) => {
+        pixelSizeInput.addEventListener('input', (e) => {
             this.pixelSize = parseInt(e.target.value);
-            if (pixelSizeValue) pixelSizeValue.textContent = this.pixelSize;
+            pixelSizeValue.textContent = this.pixelSize;
             this.appState && this.appState.updateToolSettings('pixel', { pixelSize: this.pixelSize });
             debouncedProcess();
         });
 
-        processBtn && processBtn.addEventListener('click', () => {
+        processBtn.addEventListener('click', () => {
             this.processImage();
         });
 
-        downloadBtn && downloadBtn.addEventListener('click', () => {
+        downloadBtn.addEventListener('click', () => {
             this.downloadImage();
         });
 
@@ -93,35 +91,26 @@ class PixelTool {
         
         this.imageLoader.loadFromFile(file, (error, img) => {
             if (error) {
-                this.toast && this.toast.error(error.message || '图片加载失败');
+                this.toast && this.toast.error(error.message);
                 return;
             }
             
-            try {
-                this.currentImage = img;
-                
-                if (this.appState) {
-                    this.appState.setOriginalImage(img.src);
-                    this.appState.addToHistory(img.src, 'upload');
-                }
-                
-                this.prepareProcessCanvas(img);
-                this.displayOriginalImage(img);
-                this.processImage();
-                
-                const downloadBtn = document.getElementById('pixel-download');
-                const continueBtn = document.getElementById('pixel-continue');
-                const useCurrentBtn = document.getElementById('pixel-use-current');
-                
-                if (downloadBtn) downloadBtn.disabled = false;
-                if (continueBtn) continueBtn.disabled = false;
-                if (useCurrentBtn) useCurrentBtn.style.display = 'none';
-                
-                this.toast && this.toast.success('图片上传成功');
-            } catch (e) {
-                console.error('图片处理失败:', e);
-                this.toast && this.toast.error('图片处理失败，请重试');
+            this.currentImage = img;
+            
+            if (this.appState) {
+                this.appState.setOriginalImage(img.src);
+                this.appState.addToHistory(img.src, 'upload');
             }
+            
+            this.prepareProcessCanvas(img);
+            this.displayOriginalImage(img);
+            this.processImage();
+            
+            document.getElementById('pixel-download').disabled = false;
+            document.getElementById('pixel-continue').disabled = false;
+            document.getElementById('pixel-use-current').style.display = 'none';
+            
+            this.toast && this.toast.success('图片上传成功');
         });
     }
 
@@ -195,8 +184,8 @@ class PixelTool {
     }
 
     displayOriginalImage(img) {
-        const maxWidth = 600;
-        const maxHeight = 600;
+        const maxWidth = 400;
+        const maxHeight = 400;
         
         let width = img.width;
         let height = img.height;
@@ -212,8 +201,6 @@ class PixelTool {
         }
         
         this.originalCanvasManager.setCanvasSize(width, height);
-        const ctx = this.originalCanvasManager.getContext();
-        ctx.imageSmoothingEnabled = false;
         this.originalCanvasManager.drawImage(img, 0, 0, width, height);
     }
 
@@ -316,7 +303,7 @@ class PixelTool {
         
         const link = document.createElement('a');
         link.download = 'pixel-art.png';
-        link.href = canvas.toDataURL('image/png', 1.0);
+        link.href = canvas.toDataURL('image/png');
         link.click();
     }
 
