@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Art Creator</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header class="header">
@@ -274,6 +274,14 @@
                             </div>
                         </div>
                         
+                        <div class="editor-brush-size">
+                            <h3>画笔大小</h3>
+                            <div class="brush-size-container">
+                                <input type="range" id="editor-brush-size" min="1" max="50" value="1" class="brush-size-slider">
+                                <span id="editor-brush-size-value" class="brush-size-value">1px</span>
+                            </div>
+                        </div>
+                        
                         <div class="editor-actions">
                             <h3>操作</h3>
                             <div class="editor-action-group">
@@ -298,6 +306,6 @@
         <p>&copy; 2024 Pixel Art Creator. All rights reserved.</p>
     </footer>
 
-    <script type="module" src="./js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
