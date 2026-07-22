@@ -47,28 +47,30 @@ class StyleTool {
             }
         }, 100);
 
-        uploadInput.addEventListener('change', (e) => {
+        uploadInput && uploadInput.addEventListener('change', (e) => {
             this.handleFileUpload(e.target.files[0]);
         });
 
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
 
-        uploadArea.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-        });
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
 
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                this.handleFileUpload(files[0]);
-            }
-        });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.handleFileUpload(files[0]);
+                }
+            });
+        }
 
         styleBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -77,25 +79,25 @@ class StyleTool {
             });
         });
 
-        colorCountInput.addEventListener('input', (e) => {
+        colorCountInput && colorCountInput.addEventListener('input', (e) => {
             this.colorCount = parseInt(e.target.value);
-            colorCountValue.textContent = this.colorCount;
+            if (colorCountValue) colorCountValue.textContent = this.colorCount;
             this.appState && this.appState.updateToolSettings('style', { colorCount: this.colorCount });
             debouncedProcess();
         });
 
-        strengthInput.addEventListener('input', (e) => {
+        strengthInput && strengthInput.addEventListener('input', (e) => {
             this.strength = parseInt(e.target.value);
-            strengthValue.textContent = this.strength + '%';
+            if (strengthValue) strengthValue.textContent = this.strength + '%';
             this.appState && this.appState.updateToolSettings('style', { strength: this.strength });
             debouncedProcess();
         });
 
-        processBtn.addEventListener('click', () => {
+        processBtn && processBtn.addEventListener('click', () => {
             this.processImage();
         });
 
-        downloadBtn.addEventListener('click', () => {
+        downloadBtn && downloadBtn.addEventListener('click', () => {
             this.downloadImage();
         });
 
@@ -118,26 +120,35 @@ class StyleTool {
         
         this.imageLoader.loadFromFile(file, (error, img) => {
             if (error) {
-                this.toast && this.toast.error(error.message);
+                this.toast && this.toast.error(error.message || '图片加载失败');
                 return;
             }
             
-            this.currentImage = img;
-            
-            if (this.appState) {
-                this.appState.setOriginalImage(img.src);
-                this.appState.addToHistory(img.src, 'upload');
+            try {
+                this.currentImage = img;
+                
+                if (this.appState) {
+                    this.appState.setOriginalImage(img.src);
+                    this.appState.addToHistory(img.src, 'upload');
+                }
+                
+                this.prepareProcessCanvas(img);
+                this.displayOriginalImage(img);
+                this.processImage();
+                
+                const downloadBtn = document.getElementById('style-download');
+                const continueBtn = document.getElementById('style-continue');
+                const useCurrentBtn = document.getElementById('style-use-current');
+                
+                if (downloadBtn) downloadBtn.disabled = false;
+                if (continueBtn) continueBtn.disabled = false;
+                if (useCurrentBtn) useCurrentBtn.style.display = 'none';
+                
+                this.toast && this.toast.success('图片上传成功');
+            } catch (e) {
+                console.error('图片处理失败:', e);
+                this.toast && this.toast.error('图片处理失败，请重试');
             }
-            
-            this.prepareProcessCanvas(img);
-            this.displayOriginalImage(img);
-            this.processImage();
-            
-            document.getElementById('style-download').disabled = false;
-            document.getElementById('style-continue').disabled = false;
-            document.getElementById('style-use-current').style.display = 'none';
-            
-            this.toast && this.toast.success('图片上传成功');
         });
     }
 
