@@ -12,6 +12,7 @@ class EditorTool {
         
         this.canvas = null;
         this.ctx = null;
+        this.dpr = window.devicePixelRatio || 1;
         
         this.currentTool = 'brush';
         this.currentColor = '#000000';
@@ -261,10 +262,13 @@ class EditorTool {
         this.width = width;
         this.height = height;
         
-        this.canvas.width = width;
-        this.canvas.height = height;
+        this.canvas.width = width * this.dpr;
+        this.canvas.height = height * this.dpr;
+        this.canvas.style.width = `${width}px`;
+        this.canvas.style.height = `${height}px`;
         
-        this.ctx.drawImage(img, 0, 0, width, height);
+        this.ctx.imageSmoothingEnabled = false;
+        this.ctx.drawImage(img, 0, 0, width * this.dpr, height * this.dpr);
         
         this.loadPixels();
         this.saveState();
@@ -283,14 +287,14 @@ class EditorTool {
     }
 
     loadPixels() {
-        const imageData = this.ctx.getImageData(0, 0, this.width, this.height);
+        const imageData = this.ctx.getImageData(0, 0, this.width * this.dpr, this.height * this.dpr);
         const data = imageData.data;
         
         this.pixels = [];
         for (let y = 0; y < this.height; y++) {
             this.pixels[y] = [];
             for (let x = 0; x < this.width; x++) {
-                const idx = (y * this.width + x) * 4;
+                const idx = (y * this.width * this.dpr + x * this.dpr) * 4;
                 this.pixels[y][x] = {
                     r: data[idx],
                     g: data[idx + 1],
@@ -305,8 +309,10 @@ class EditorTool {
         this.width = Math.min(width, this.MAX_SIZE);
         this.height = Math.min(height, this.MAX_SIZE);
         
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
+        this.canvas.width = this.width * this.dpr;
+        this.canvas.height = this.height * this.dpr;
+        this.canvas.style.width = `${this.width}px`;
+        this.canvas.style.height = `${this.height}px`;
         
         this.pixels = [];
         for (let y = 0; y < this.height; y++) {
@@ -449,21 +455,25 @@ class EditorTool {
 
     drawPixel(x, y, r, g, b, a) {
         this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a / 255})`;
-        this.ctx.fillRect(x, y, 1, 1);
+        this.ctx.fillRect(x * this.dpr, y * this.dpr, this.dpr, this.dpr);
     }
 
     drawCanvas() {
-        const imageData = this.ctx.createImageData(this.width, this.height);
+        const imageData = this.ctx.createImageData(this.width * this.dpr, this.height * this.dpr);
         const data = imageData.data;
         
         for (let y = 0; y < this.height; y++) {
             for (let x = 0; x < this.width; x++) {
-                const idx = (y * this.width + x) * 4;
                 const pixel = this.pixels[y][x];
-                data[idx] = pixel.r;
-                data[idx + 1] = pixel.g;
-                data[idx + 2] = pixel.b;
-                data[idx + 3] = pixel.a;
+                for (let dy = 0; dy < this.dpr; dy++) {
+                    for (let dx = 0; dx < this.dpr; dx++) {
+                        const idx = ((y * this.dpr + dy) * this.width * this.dpr + (x * this.dpr + dx)) * 4;
+                        data[idx] = pixel.r;
+                        data[idx + 1] = pixel.g;
+                        data[idx + 2] = pixel.b;
+                        data[idx + 3] = pixel.a;
+                    }
+                }
             }
         }
         
@@ -486,12 +496,12 @@ class EditorTool {
         
         this.ctx.beginPath();
         for (let x = 0; x <= this.width; x++) {
-            this.ctx.moveTo(x, 0);
-            this.ctx.lineTo(x, this.height);
+            this.ctx.moveTo(x * this.dpr, 0);
+            this.ctx.lineTo(x * this.dpr, this.height * this.dpr);
         }
         for (let y = 0; y <= this.height; y++) {
-            this.ctx.moveTo(0, y);
-            this.ctx.lineTo(this.width, y);
+            this.ctx.moveTo(0, y * this.dpr);
+            this.ctx.lineTo(this.width * this.dpr, y * this.dpr);
         }
         this.ctx.stroke();
     }
@@ -598,6 +608,10 @@ class EditorTool {
             this.pixels = state.pixels;
             this.width = state.width;
             this.height = state.height;
+            this.canvas.width = this.width * this.dpr;
+            this.canvas.height = this.height * this.dpr;
+            this.canvas.style.width = `${this.width}px`;
+            this.canvas.style.height = `${this.height}px`;
             this.drawCanvas();
         }
         this.updateUndoRedoButtons();
@@ -609,6 +623,10 @@ class EditorTool {
             this.pixels = state.pixels;
             this.width = state.width;
             this.height = state.height;
+            this.canvas.width = this.width * this.dpr;
+            this.canvas.height = this.height * this.dpr;
+            this.canvas.style.width = `${this.width}px`;
+            this.canvas.style.height = `${this.height}px`;
             this.drawCanvas();
         }
         this.updateUndoRedoButtons();
@@ -640,6 +658,8 @@ class EditorTool {
         this.historyManager.clear();
         this.canvas.width = 0;
         this.canvas.height = 0;
+        this.canvas.style.width = '';
+        this.canvas.style.height = '';
         
         const uploadArea = document.getElementById('editor-upload-area');
         const editorArea = document.getElementById('editor-main-area');
@@ -670,6 +690,8 @@ class EditorTool {
         
         this.canvas.width = 0;
         this.canvas.height = 0;
+        this.canvas.style.width = '';
+        this.canvas.style.height = '';
         
         const uploadArea = document.getElementById('editor-upload-area');
         const editorArea = document.getElementById('editor-main-area');
@@ -696,9 +718,32 @@ class EditorTool {
             return;
         }
         
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = this.width;
+        tempCanvas.height = this.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        
+        const imageData = this.ctx.getImageData(0, 0, this.width * this.dpr, this.height * this.dpr);
+        const data = imageData.data;
+        const outputData = tempCtx.createImageData(this.width, this.height);
+        const output = outputData.data;
+        
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const idx = (y * this.width * this.dpr + x * this.dpr) * 4;
+                const outIdx = (y * this.width + x) * 4;
+                output[outIdx] = data[idx];
+                output[outIdx + 1] = data[idx + 1];
+                output[outIdx + 2] = data[idx + 2];
+                output[outIdx + 3] = data[idx + 3];
+            }
+        }
+        
+        tempCtx.putImageData(outputData, 0, 0);
+        
         const link = document.createElement('a');
         link.download = 'pixel-art.png';
-        link.href = this.canvas.toDataURL('image/png');
+        link.href = tempCanvas.toDataURL('image/png', 1.0);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
