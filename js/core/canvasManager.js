@@ -26,7 +26,6 @@ class CanvasManager {
             this.canvas.height = height * this.dpr;
             this.canvas.style.width = `${width}px`;
             this.canvas.style.height = `${height}px`;
-            this.ctx.scale(this.dpr, this.dpr);
         } else {
             this.canvas.width = width;
             this.canvas.height = height;
